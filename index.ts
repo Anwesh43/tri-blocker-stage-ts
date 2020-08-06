@@ -1,11 +1,11 @@
 const w : number = window.innerWidth 
 const h : number = window.innerHeight 
-const scGap : number = 0.02 
+const parts : number = 3
+const scGap : number = 0.02 / parts  
 const sizeFactor : number = 4
 const delay : number = 20
 const colors : Array<string> = ["#3F51B5", "#4CAF50", "#2196F3", "#009688", "#FFEB3B"]
 const backColor : string = "#bdbdbd"
-const parts : number = 3
 const strokeFactor : number = 90
 
 class ScaleUtil {
@@ -38,17 +38,20 @@ class DrawingUtil {
         const sf3 : number = ScaleUtil.divideScale(sf, 2, parts)
         const size : number = Math.min(w, h) / sizeFactor 
         for (var j = 0; j < 3; j++) {
-            const y = (h / 2 - size / 2) * (j % 2) * sf2 
+            const y = -(h / 2 - size / 2) * (j % 2) * sf2 
             context.save()
             context.translate((w / 2 - size / 2) * j, y)
             context.fillRect(0, -size * sf1, size, size * sf1)
             context.restore()
         }
-        const xSize : number = w * 0.5 * sf3
-        const ySize : number = h * 0.5 * sf3 
-        DrawingUtil.drawLine(context, 0, 0, xSize, -ySize)
+        const xSize : number = (w * 0.5 - size / 2) * sf3
+        const ySize : number = (h * 0.5 - size / 2) * sf3 
+        if (sf3 <= 0) {
+            return
+        }
+        DrawingUtil.drawLine(context, size / 2, -size / 2, size / 2  + xSize, -size / 2 - ySize)
         DrawingUtil.drawLine(context, w * 0.5, -h * 0.5, w * 0.5 + xSize, -h * 0.5 + ySize)
-        DrawingUtil.drawLine(context, w , 0, w - w * sf3, 0)
+        DrawingUtil.drawLine(context, w - size / 2, -size / 2, w - size / 2 - (w - size) * sf3, -size / 2)
     }
 
     static drawTBNode(context : CanvasRenderingContext2D, i : number, scale : number) {
@@ -106,6 +109,7 @@ class State {
 
     update(cb : Function) {
         this.scale += scGap * this.dir 
+        console.log(this.scale)
         if (Math.abs(this.scale - this.prevScale) > 1) {
             this.scale = this.prevScale + this.dir 
             this.dir = 0
@@ -194,7 +198,12 @@ class TriBlocker {
     }
 
     update(cb : Function) {
-        this.curr.update(cb)
+        this.curr.update(() => {
+            this.curr = this.curr.getNext(this.dir, () => {
+                this.dir *= -1
+            })
+            cb()
+        })
     }
 
     startUpdating(cb : Function) {
