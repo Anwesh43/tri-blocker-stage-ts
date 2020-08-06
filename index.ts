@@ -5,3 +5,31 @@ const sizeFactor : number = 4
 const delay : number = 20
 const colors : Array<string> = ["#3F51B5", "#4CAF50", "#2196F3", "#009688", "#FFEB3B"]
 const backColor : string = "#bdbdbd"
+
+class Stage {
+
+    canvas : HTMLCanvasElement = document.createElement('canvas')
+    context : CanvasRenderingContext2D
+
+    initCanvas() {
+        this.canvas.width = w 
+        this.canvas.height = h 
+        this.context = this.canvas.getContext('2d')
+        document.body.appendChild(this.canvas)
+    }
+
+    render() {
+        this.context.fillStyle = backColor 
+        this.context.fillRect(0, 0, w, h)
+    }
+
+    handleTap() {
+        this.canvas.onmousedown = () => {
+
+        }
+    }
+
+    static init() {
+        
+    }
+}
